@@ -15,6 +15,11 @@ func InitAPI(cfg *Config) {
 	gAuthorize = NewAuthorizeHandle(cfg)
 }
 
+// GetAuthorize 获取全局的授权处理
+func GetAuthorize() *AuthorizeHandle {
+	return gAuthorize
+}
+
 // UserInfo 更新用户信息
 type UserInfo struct {
 	MobilePhone string
@@ -190,5 +195,11 @@ func DelStaffUser(uid string) (result *ErrorResult) {
 // UpdateAuthStatus 更新用户认证状态
 func UpdateAuthStatus(uid string) (result *ErrorResult) {
 	result = gAuthorize.UpdateAuthStatus(uid)
+	return
+}
+
+// GetAntUIDList 获取ANT用户ID列表
+func GetAntUIDList(service string, uids ...string) (auids []string, result *ErrorResult) {
+	auids, result = gAuthorize.GetAntUIDList(service, uids...)
 	return
 }

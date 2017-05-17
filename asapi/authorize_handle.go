@@ -658,3 +658,28 @@ func (ah *AuthorizeHandle) UpdateAuthStatus(uid string) (result *ErrorResult) {
 	result = ah.tokenPost("/api/authorize/updateauthstatus", body, nil)
 	return
 }
+
+// GetAntUIDList 获取ANT用户ID列表
+func (ah *AuthorizeHandle) GetAntUIDList(service string, uids ...string) (auids []string, result *ErrorResult) {
+	svc := ah.cfg.ServiceIdentify
+	if service != "" {
+		svc = service
+	}
+
+	body := map[string]interface{}{
+		"ServiceIdentify": svc,
+		"UID":             uids,
+	}
+
+	var res struct {
+		ANTUID []string
+	}
+
+	result = ah.tokenPost("/api/authorize/getantuser", body, &res)
+	if result != nil {
+		return
+	}
+	auids = res.ANTUID
+
+	return
+}
