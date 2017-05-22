@@ -51,6 +51,7 @@ func (h *Handle) Add(req *AddRequest) (err error) {
 		"ContentValue": req.ContentValue,
 		"URIValue":     req.URIValue,
 		"Status":       req.Status,
+		"BuID":         req.BuID,
 	}
 
 	if !req.PubTime.IsZero() {
