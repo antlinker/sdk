@@ -75,9 +75,17 @@ type DoneRequest struct {
 
 // Done 完成待办事项
 func (h *Handle) Done(req *DoneRequest) (err error) {
+	auids, ar := h.auh.GetAntUIDList("", req.UID)
+	if ar != nil {
+		err = ar
+		return
+	} else if len(auids) == 0 {
+		return
+	}
+
 	mreq := map[string]interface{}{
 		"MT":       "COMPLETETODO",
-		"UID":      req.UID,
+		"UID":      auids[0],
 		"BuID":     req.BuID,
 		"TodoType": req.TodoType,
 	}
@@ -94,9 +102,17 @@ type DelRequest struct {
 
 // Del 删除待办事项
 func (h *Handle) Del(req *DelRequest) (err error) {
+	auids, ar := h.auh.GetAntUIDList("", req.UID)
+	if ar != nil {
+		err = ar
+		return
+	} else if len(auids) == 0 {
+		return
+	}
+
 	mreq := map[string]interface{}{
 		"MT":       "DELTODO",
-		"UID":      req.UID,
+		"UID":      auids[0],
 		"BuID":     req.BuID,
 		"TodoType": req.TodoType,
 	}

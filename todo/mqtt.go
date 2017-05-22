@@ -1,6 +1,10 @@
 package todo
 
-import "github.com/antlinker/go-mqtt/client"
+import (
+	"crypto/tls"
+
+	"github.com/antlinker/go-mqtt/client"
+)
 
 // MQTTConfig mqtt配置参数
 type MQTTConfig struct {
@@ -23,6 +27,7 @@ func NewMQTTClient(cfg *MQTTConfig) (cli client.MqttClienter, err error) {
 		UserName:           cfg.Username,
 		PasswordHandler:    cfg.PasswordHandler,
 		KeepAlive:          cfg.Timeout,
+		TLS:                &tls.Config{InsecureSkipVerify: true},
 	}
 
 	cli, err = client.CreateClient(opts)
