@@ -84,7 +84,7 @@ func (h *Handle) Done(req *DoneRequest) (err error) {
 	}
 
 	mreq := map[string]interface{}{
-		"MT":       "COMPLETETODO",
+		"MT":       "DONETODO",
 		"UID":      auids[0],
 		"BuID":     req.BuID,
 		"TodoType": req.TodoType,
