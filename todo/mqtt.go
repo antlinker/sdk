@@ -15,6 +15,7 @@ type MQTTConfig struct {
 	ReconnectInterval int
 	Username          string
 	PasswordHandler   func() string
+	EnableTLS         bool
 }
 
 // NewMQTTClient 创建默认的MQTT客户端
@@ -27,7 +28,10 @@ func NewMQTTClient(cfg *MQTTConfig) (cli client.MqttClienter, err error) {
 		UserName:           cfg.Username,
 		PasswordHandler:    cfg.PasswordHandler,
 		KeepAlive:          cfg.Timeout,
-		TLS:                &tls.Config{InsecureSkipVerify: true},
+	}
+
+	if cfg.EnableTLS {
+		opts.TLS = &tls.Config{InsecureSkipVerify: true}
 	}
 
 	cli, err = client.CreateClient(opts)

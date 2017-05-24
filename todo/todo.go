@@ -1,6 +1,7 @@
 package todo
 
 import (
+	"github.com/antlinker/go-mqtt/client"
 	"github.com/antlinker/sdk/asapi"
 )
 
@@ -27,6 +28,11 @@ func SetMQTTClient(mqcfg *MQTTConfig) {
 		panic(err)
 	}
 
+	gHandle.mqcli = cli
+}
+
+// SetMQTTClienter 设置MQTT客户端
+func SetMQTTClienter(cli client.MqttClienter) {
 	gHandle.mqcli = cli
 }
 
