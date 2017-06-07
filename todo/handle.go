@@ -30,6 +30,7 @@ type AddRequest struct {
 	TodoType     string
 	ContentValue map[string]string
 	URIValue     map[string]string
+	PushValue    map[string]string
 	PubTime      time.Time
 	EndTime      time.Time
 	Status       int
@@ -50,6 +51,7 @@ func (h *Handle) Add(req *AddRequest) (err error) {
 		"TodoType":     req.TodoType,
 		"ContentValue": req.ContentValue,
 		"URIValue":     req.URIValue,
+		"PushValue":    req.PushValue,
 		"Status":       req.Status,
 		"BuID":         req.BuID,
 	}
