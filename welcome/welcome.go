@@ -1,4 +1,4 @@
-package todo
+package welcome
 
 import (
 	"github.com/antlinker/go-mqtt/client"
@@ -18,20 +18,8 @@ func SetAuthorizeHandle(auh *asapi.AuthorizeHandle) {
 	gHandle.auh = auh
 }
 
-// MQTTConfig mqtt配置参数
-type MQTTConfig struct {
-	BrokerAddress     string
-	ClientID          string
-	Timeout           uint16
-	CleanSession      bool
-	ReconnectInterval int
-	Username          string
-	PasswordHandler   func() string
-	EnableTLS         bool
-}
-
 // SetMQTTClient 设置MQTT客户端
-func SetMQTTClient(mqcfg *MQTTConfig) {
+func SetMQTTClient(mqcfg *utils.MQTTConfig) {
 	if gHandle == nil {
 		gHandle = new(Handle)
 	}
@@ -60,20 +48,14 @@ func SetMQTTClienter(cli client.MqttClienter) {
 	gHandle.mqcli = cli
 }
 
-// Add 增加待办事项
-func Add(req *AddRequest) (err error) {
-	err = gHandle.Add(req)
+// Click 任务点击记录
+func Click(req *ClickRequest) (err error) {
+	err = gHandle.Click(req)
 	return
 }
 
-// Done 完成待办事项
+// Done 任务完成记录
 func Done(req *DoneRequest) (err error) {
 	err = gHandle.Done(req)
-	return
-}
-
-// Del 删除待办事项
-func Del(req *DelRequest) (err error) {
-	err = gHandle.Del(req)
 	return
 }
