@@ -59,3 +59,9 @@ func Done(req *DoneRequest) (err error) {
 	err = gHandle.Done(req)
 	return
 }
+
+// Cancel 任务取消记录
+func Cancel(req *CancelRequest) (err error) {
+	err = gHandle.Cancel(req)
+	return
+}

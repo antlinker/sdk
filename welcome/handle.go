@@ -50,7 +50,7 @@ func (h *Handle) Click(req *ClickRequest) (err error) {
 	return
 }
 
-// DoneRequest 任务点击记录请求参数
+// DoneRequest 任务完成记录请求参数
 type DoneRequest struct {
 	DoneTime time.Time
 	TaskCode string
@@ -76,6 +76,33 @@ func (h *Handle) Done(req *DoneRequest) (err error) {
 
 	if !req.DoneTime.IsZero() {
 		mreq["DoneTime"] = req.DoneTime.Format("20060102150405")
+	}
+
+	err = h.publish(mreq)
+	return
+}
+
+// CancelRequest 任务取消记录请求参数
+type CancelRequest struct {
+	TaskCode string
+	UID      string
+}
+
+// Cancel 任务取消记录
+func (h *Handle) Cancel(req *CancelRequest) (err error) {
+	auids, ar := h.auh.GetAntUIDList("", req.UID)
+	if ar != nil {
+		err = ar
+		return
+	} else if len(auids) == 0 {
+		err = errors.New("not found user")
+		return
+	}
+
+	mreq := map[string]interface{}{
+		"MT":       "CANCELTASK",
+		"UID":      auids[0],
+		"TaskCode": req.TaskCode,
 	}
 
 	err = h.publish(mreq)
