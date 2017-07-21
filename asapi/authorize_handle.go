@@ -683,3 +683,24 @@ func (ah *AuthorizeHandle) GetAntUIDList(service string, uids ...string) (auids 
 
 	return
 }
+
+// GetAntUIDByUniversity 根据学校查询ANT用户ID
+func (ah *AuthorizeHandle) GetAntUIDByUniversity(userID, university string) (uid string, result *ErrorResult) {
+	body := map[string]interface{}{
+		"ServiceIdentify": ah.cfg.ServiceIdentify,
+		"UserID":          userID,
+		"University":      university,
+	}
+
+	var res struct {
+		UID string
+	}
+
+	result = ah.tokenPost("/api/authorize/antuidbyuniversity", body, &res)
+	if result != nil {
+		return
+	}
+	uid = res.UID
+
+	return
+}

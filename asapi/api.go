@@ -203,3 +203,9 @@ func GetAntUIDList(service string, uids ...string) (auids []string, result *Erro
 	auids, result = gAuthorize.GetAntUIDList(service, uids...)
 	return
 }
+
+// GetAntUIDByUniversity 根据学校查询ANT用户ID
+func GetAntUIDByUniversity(userID, university string) (uid string, result *ErrorResult) {
+	uid, result = gAuthorize.GetAntUIDByUniversity(userID, university)
+	return
+}
