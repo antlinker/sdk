@@ -83,7 +83,7 @@ func (h *Handle) request(body interface{}) (err error) {
 	}
 
 	var str string
-	json.Unmarshal(data, str)
+	json.Unmarshal(data, &str)
 	if str != "ok" {
 		err = fmt.Errorf(string(data))
 	}
