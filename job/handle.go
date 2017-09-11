@@ -62,10 +62,20 @@ func (h *Handle) getANTUserID(intelUserCode string) (userID string, err error) {
 	return
 }
 
-func (h *Handle) request(body interface{}) (err error) {
+func (h *Handle) request(typ string, rdata interface{}) (err error) {
+	buf, err := json.Marshal(rdata)
+	if err != nil {
+		return
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 
 	defer cancel()
+
+	body := map[string]interface{}{
+		"typ":  typ,
+		"data": string(buf),
+	}
 
 	data, err := utils.PostJSON(ctx, h.getURL(jobRouter), body, func(req *http.Request) (*http.Request, error) {
 		token, err := asapi.GetToken()
@@ -103,7 +113,7 @@ func (h *Handle) ModifyStaffName(intelUserCode, name string) (err error) {
 		"Name": name,
 	}
 
-	err = h.request(body)
+	err = h.request("modifyStaffName", body)
 
 	return
 }
@@ -121,7 +131,7 @@ func (h *Handle) ModifyStaffDept(intelUserCode, deptID, deptName string) (err er
 		"DeptName": deptName,
 	}
 
-	err = h.request(body)
+	err = h.request("modifyStaffDept", body)
 
 	return
 }
@@ -155,7 +165,7 @@ func (h *Handle) ModifyStudentClass(intelUserCode string, req *ModifyStudentClas
 		"ClassName":   req.ClassName,
 	}
 
-	err = h.request(body)
+	err = h.request("modifyStudentClass", body)
 
 	return
 }
@@ -171,7 +181,7 @@ func (h *Handle) ModifyStaffClass(intelUserCode string) (err error) {
 		"UID": userID,
 	}
 
-	err = h.request(body)
+	err = h.request("modifyStaffClass", body)
 
 	return
 }
@@ -184,7 +194,7 @@ func (h *Handle) ModifyStaffDeptName(university, deptID, deptName string) (err e
 		"DeptName":   deptName,
 	}
 
-	err = h.request(body)
+	err = h.request("modifyStaffDeptName", body)
 
 	return
 }
@@ -197,7 +207,7 @@ func (h *Handle) ModifyStaffClassName(university, deptID, deptName string) (err 
 		"DeptName":   deptName,
 	}
 
-	err = h.request(body)
+	err = h.request("modifyStaffClassName", body)
 
 	return
 }
