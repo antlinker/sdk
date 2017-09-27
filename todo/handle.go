@@ -34,11 +34,12 @@ type AddRequest struct {
 	PubTime      time.Time
 	EndTime      time.Time
 	Status       int
+	Service      string
 }
 
 // Add 增加待办事项
 func (h *Handle) Add(req *AddRequest) (err error) {
-	auids, ar := h.auh.GetAntUIDList("", req.UIDs...)
+	auids, ar := h.auh.GetAntUIDList(req.Service, req.UIDs...)
 	if ar != nil {
 		err = ar
 		return
