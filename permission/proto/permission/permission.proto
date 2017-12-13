@@ -1,0 +1,85 @@
+syntax = "proto3";
+package permission;
+
+// 权限接口调用
+service Permission {
+    // 使用用户名和密码登录
+    rpc LoginWithUserName(LoginWithUserNameRequest) returns (LoginReply){}
+    // 使用用户ID和密码登录
+    rpc LoginWithUserID(LoginWithUserIDRequest) returns (LoginReply){}
+    // 查询用户的功能菜单
+    rpc QueryUserMenus(QueryUserMenusRequest) returns (QueryUserMenusReply){}
+}
+
+// 使用用户名和密码登录请求参数
+message LoginWithUserNameRequest {
+    // 用户名
+    string username = 1;
+    // 用户密码(明文)
+    string password = 2;
+}
+
+// 使用用户ID和密码登录请求参数
+message LoginWithUserIDRequest {
+    // 用户名
+    string user_id = 1;
+    // 用户密码(明文)
+    string password = 2;
+}
+
+// 用户登录之后的响应参数
+message LoginReply {
+    // 用户ID
+    string user_id = 1;
+    // 用户名
+    string username = 2;
+    // 真实姓名
+    string realname = 3;
+    // 机构代码
+    string org_id = 4;
+    // 用户类型编号
+    string type_code = 5;
+    // 用户状态(0:停用 1:启用)
+    int32 status = 6;
+}
+
+// 查询用户的功能菜单请求参数
+message QueryUserMenusRequest {
+    // 用户ID
+    string user_id = 1;
+    // 系统编码
+    repeated string system_codes = 2;
+}
+
+// 查询用户的功能菜单响应参数
+message QueryUserMenusReply {
+    // 动作
+    message Action {
+        // 编号
+        string code = 1;
+        // 名称
+        string name = 2;
+    }
+
+    // 功能菜单
+    message FuncMenu {
+        // 编号
+        string code = 1;
+        // 名称
+        string name = 2;
+        // 路由类型(1内部跳转 2外部跳转)
+        int32 router_type = 3;
+        // 跳转路由
+        string router = 4;
+        // 分级码
+        string level_code = 5;
+        // 菜单图标
+        string icon = 6;
+        // 菜单动作
+        repeated Action actions = 7;
+        // 子级菜单
+        repeated FuncMenu children = 8;
+    }
+
+    repeated FuncMenu results = 1;
+}
