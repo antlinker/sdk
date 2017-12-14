@@ -1,10 +1,10 @@
 package client
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/antlinker/sdk/permission/proto/permission"
+	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
