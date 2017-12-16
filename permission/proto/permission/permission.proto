@@ -9,6 +9,14 @@ service Permission {
     rpc LoginWithUserID(LoginWithUserIDRequest) returns (LoginReply){}
     // 查询用户的功能菜单
     rpc QueryUserMenus(QueryUserMenusRequest) returns (QueryUserMenusReply){}
+    // 验证路由权限
+    rpc VerificationRouter(VerificationRouterRequest) returns (VerificationRouterReply){}
+    // 创建用户
+    rpc CreateUser(CreateUserRequest) returns (CreateUserReply){}
+    // 更新用户
+    rpc UpdateUser(UpdateUserRequest) returns (UpdateUserReply){}
+    // 修改密码
+    rpc ModifyPassword(ModifyPasswordRequest) returns (ModifyPasswordReply){}
 }
 
 // 使用用户名和密码登录请求参数
@@ -82,4 +90,86 @@ message QueryUserMenusReply {
     }
 
     repeated FuncMenu results = 1;
+}
+
+// 验证路由权限请求参数
+message VerificationRouterRequest {
+    // 用户ID
+    string user_id = 1;
+    // 资源所属的系统编号
+    string system_code = 2;
+    // 路由
+    string router = 3;
+    // 请求方法
+    string method = 4;
+}
+
+// 验证路由权限响应参数
+message VerificationRouterReply {
+    // 是否允许
+    bool is_allow = 1;
+}
+
+// 创建用户请求参数
+message CreateUserRequest {
+    // 登录账号
+    string user_name = 1;
+    // 登录密码
+    string password = 2;
+    // 真实姓名
+    string real_name = 3;
+    // 用户类型编号
+    string type_code = 4;
+    // 机构编号
+    string org_code = 5;
+    // 角色编号
+    repeated string role_codes = 6;
+    // 用户组编号
+    repeated string group_codes = 7;
+}
+
+// 创建用户响应参数
+message CreateUserReply {
+    // 是否成功
+    bool is_success = 1;
+    // 错误代码(9002 用户名已经存在,9004 机构编号不存在)
+    string error_code = 2;
+    // 用户ID
+    string user_id = 3;
+}
+
+// 更新用户请求参数
+message UpdateUserRequest {
+    // 用户ID
+    string user_id = 1;
+    // 登录账号
+    string user_name = 2;
+    // 真实姓名
+    string real_name = 3;
+}
+
+// 更新用户请求参数
+message UpdateUserReply {
+    // 是否成功
+    bool is_success = 1;
+    // 错误代码(9001 用户不存在,9002 用户名已经存在)
+    string error_code = 2;
+}
+
+// 修改密码请求参数
+message ModifyPasswordRequest {
+    // 用户ID
+    string user_id = 1;
+    // 原始密码
+    string old_password = 2;
+    // 新密码
+    string new_password = 3;
+}
+
+// 修改密码响应参数
+message ModifyPasswordReply {
+    // 是否成功
+    bool is_success = 1;
+    // 错误代码(9001 用户不存在,9003 原始密码不正确)
+    string error_code = 2;
 }

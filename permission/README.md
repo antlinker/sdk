@@ -44,3 +44,7 @@ func main() {
 * **LoginWithUserName** - 使用用户名和密码登录
 * **LoginWithUserID** - 使用用户ID和密码登录
 * **QueryUserMenus** - 查询用户的功能菜单
+* **VerificationRouter** - 验证路由权限
+* **CreateUser** - 创建用户
+* **UpdateUser** - 更新用户
+* **ModifyPassword** - 修改密码
