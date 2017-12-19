@@ -15,14 +15,16 @@ service Permission {
     rpc CreateUser(CreateUserRequest) returns (CreateUserReply){}
     // 更新用户
     rpc UpdateUser(UpdateUserRequest) returns (UpdateUserReply){}
+    // 删除用户
+    rpc DeleteUser(DeleteUserRequest) returns (DeleteUserReply){}
     // 修改密码
     rpc ModifyPassword(ModifyPasswordRequest) returns (ModifyPasswordReply){}
+    // 重置密码
+    rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordReply){}
     // 查询机构树
     rpc QueryOrgTree(QueryOrgTreeRequest) returns (QueryOrgTreeReply){}
     // 查询角色列表
     rpc QueryRoles(QueryRolesRequest) returns (QueryRolesReply){}
-    // 重置密码
-    rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordReply){}
 }
 
 // 使用用户名和密码登录请求参数
@@ -154,15 +156,21 @@ message UpdateUserRequest {
     string user_name = 2;
     // 真实姓名
     string real_name = 3;
+    // 机构编号
+    string org_code = 4;
+    // 角色编号
+    repeated string role_codes = 5;
+    // 用户组编号
+    repeated string group_codes = 6;
     // 操作用户
-    string operator = 4;
+    string operator = 7;
 }
 
 // 更新用户请求参数
 message UpdateUserReply {
     // 是否成功
     bool is_success = 1;
-    // 错误代码(9001 用户不存在,9002 用户名已经存在)
+    // 错误代码(9001 用户不存在,9002 用户名已经存在,9004 机构编号不存在)
     string error_code = 2;
 }
 
@@ -242,4 +250,20 @@ message ResetPasswordReply {
      bool is_success = 1;
      // 错误代码(9001 用户不存在)
      string error_code = 2;
+}
+
+// 删除用户请求参数
+message DeleteUserRequest {
+    // 操作用户
+    string operator = 1;
+    // 用户ID
+    string user_id = 2;
+}
+
+// DeleteUserReply 删除用户响应参数
+message DeleteUserReply {
+    // 是否成功
+    bool is_success = 1;
+    // 错误代码(9001 用户不存在)
+    string error_code = 2;
 }
