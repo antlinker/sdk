@@ -55,8 +55,10 @@ message LoginReply {
     string org_code = 4;
     // 用户类型编号
     string type_code = 5;
+    // 角色编号
+    repeated string role_codes = 6;
     // 用户状态(0:停用 1:启用)
-    int32 status = 6;
+    int32 status = 7;
 }
 
 // 查询用户的功能菜单请求参数
