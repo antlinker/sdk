@@ -47,4 +47,8 @@ func main() {
 * **VerificationRouter** - 验证路由权限
 * **CreateUser** - 创建用户
 * **UpdateUser** - 更新用户
+* **DeleteUser** - 删除用户
 * **ModifyPassword** - 修改密码
+* **ResetPassword** - 重置密码
+* **QueryOrgTree** - 查询机构树
+* **QueryRoles** - 查询角色列表
