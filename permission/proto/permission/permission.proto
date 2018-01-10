@@ -25,6 +25,8 @@ service Permission {
     rpc QueryOrgTree(QueryOrgTreeRequest) returns (QueryOrgTreeReply){}
     // 查询角色列表
     rpc QueryRoles(QueryRolesRequest) returns (QueryRolesReply){}
+    // 获取客户端
+    rpc GetClient(GetClientRequest) returns (GetClientReply){}
 }
 
 // 使用用户名和密码登录请求参数
@@ -262,10 +264,27 @@ message DeleteUserRequest {
     string user_id = 2;
 }
 
-// DeleteUserReply 删除用户响应参数
+// 删除用户响应参数
 message DeleteUserReply {
     // 是否成功
     bool is_success = 1;
     // 错误代码(9001 用户不存在)
     string error_code = 2;
+}
+
+// 获取客户端请求参数
+message GetClientRequest {
+    string client_id = 1;
+}
+
+// 获取客户端响应参数
+message GetClientReply {
+    // 客户端ID
+    string client_id = 1;
+    // 客户端秘钥
+    string client_secret = 2;
+    // 允许的授权模式(1<<1:授权码模式 1<<2:简化模式 1<<3:密码模式 1<<4:客户端模式 1<<5:刷新令牌模式)
+    int32 allow_grant = 3;
+    // 域名
+    string domain = 4;
 }

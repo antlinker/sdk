@@ -52,3 +52,4 @@ func main() {
 * **ResetPassword** - 重置密码
 * **QueryOrgTree** - 查询机构树
 * **QueryRoles** - 查询角色列表
+* **GetClient** - 获取客户端
