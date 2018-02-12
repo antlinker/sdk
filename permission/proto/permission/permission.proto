@@ -1,0 +1,290 @@
+syntax = "proto3";
+package permission;
+
+// 权限接口调用
+service Permission {
+    // 使用用户名和密码登录
+    rpc LoginWithUserName(LoginWithUserNameRequest) returns (LoginReply){}
+    // 使用用户ID和密码登录
+    rpc LoginWithUserID(LoginWithUserIDRequest) returns (LoginReply){}
+    // 查询用户的功能菜单
+    rpc QueryUserMenus(QueryUserMenusRequest) returns (QueryUserMenusReply){}
+    // 验证路由权限
+    rpc VerificationRouter(VerificationRouterRequest) returns (VerificationRouterReply){}
+    // 创建用户
+    rpc CreateUser(CreateUserRequest) returns (CreateUserReply){}
+    // 更新用户
+    rpc UpdateUser(UpdateUserRequest) returns (UpdateUserReply){}
+    // 删除用户
+    rpc DeleteUser(DeleteUserRequest) returns (DeleteUserReply){}
+    // 修改密码
+    rpc ModifyPassword(ModifyPasswordRequest) returns (ModifyPasswordReply){}
+    // 重置密码
+    rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordReply){}
+    // 查询机构树
+    rpc QueryOrgTree(QueryOrgTreeRequest) returns (QueryOrgTreeReply){}
+    // 查询角色列表
+    rpc QueryRoles(QueryRolesRequest) returns (QueryRolesReply){}
+    // 获取客户端
+    rpc GetClient(GetClientRequest) returns (GetClientReply){}
+}
+
+// 使用用户名和密码登录请求参数
+message LoginWithUserNameRequest {
+    // 用户名
+    string username = 1;
+    // 用户密码(明文)
+    string password = 2;
+}
+
+// 使用用户ID和密码登录请求参数
+message LoginWithUserIDRequest {
+    // 用户名
+    string user_id = 1;
+    // 用户密码(明文)
+    string password = 2;
+}
+
+// 用户登录之后的响应参数
+message LoginReply {
+    // 用户ID
+    string user_id = 1;
+    // 用户名
+    string username = 2;
+    // 真实姓名
+    string realname = 3;
+    // 机构编号
+    string org_code = 4;
+    // 用户类型编号
+    string type_code = 5;
+    // 角色编号
+    repeated string role_codes = 6;
+    // 用户状态(0:停用 1:启用)
+    int32 status = 7;
+}
+
+// 查询用户的功能菜单请求参数
+message QueryUserMenusRequest {
+    // 用户ID
+    string user_id = 1;
+    // 系统编码
+    repeated string system_codes = 2;
+}
+
+// 查询用户的功能菜单响应参数
+message QueryUserMenusReply {
+    // 动作
+    message Action {
+        // 编号
+        string code = 1;
+        // 名称
+        string name = 2;
+    }
+
+    // 功能菜单
+    message FuncMenu {
+        // 编号
+        string code = 1;
+        // 名称
+        string name = 2;
+        // 路由类型(1内部跳转 2外部跳转)
+        int32 router_type = 3;
+        // 跳转路由
+        string router = 4;
+        // 分级码
+        string level_code = 5;
+        // 菜单图标
+        string icon = 6;
+        // 菜单动作
+        repeated Action actions = 7;
+        // 子级菜单
+        repeated FuncMenu children = 8;
+    }
+
+    repeated FuncMenu results = 1;
+}
+
+// 验证路由权限请求参数
+message VerificationRouterRequest {
+    // 用户ID
+    string user_id = 1;
+    // 资源所属的系统编号
+    string system_code = 2;
+    // 路由
+    string router = 3;
+    // 请求方法
+    string method = 4;
+}
+
+// 验证路由权限响应参数
+message VerificationRouterReply {
+    // 是否允许
+    bool is_allow = 1;
+}
+
+// 创建用户请求参数
+message CreateUserRequest {
+    // 登录账号
+    string user_name = 1;
+    // 登录密码
+    string password = 2;
+    // 真实姓名
+    string real_name = 3;
+    // 用户类型编号
+    string type_code = 4;
+    // 机构编号
+    string org_code = 5;
+    // 角色编号
+    repeated string role_codes = 6;
+    // 用户组编号
+    repeated string group_codes = 7;
+    // 操作用户
+    string operator = 8;
+}
+
+// 创建用户响应参数
+message CreateUserReply {
+    // 是否成功
+    bool is_success = 1;
+    // 错误代码(9002 用户名已经存在,9004 机构编号不存在)
+    string error_code = 2;
+    // 用户ID
+    string user_id = 3;
+}
+
+// 更新用户请求参数
+message UpdateUserRequest {
+    // 用户ID
+    string user_id = 1;
+    // 登录账号
+    string user_name = 2;
+    // 真实姓名
+    string real_name = 3;
+    // 机构编号
+    string org_code = 4;
+    // 角色编号
+    repeated string role_codes = 5;
+    // 用户组编号
+    repeated string group_codes = 6;
+    // 操作用户
+    string operator = 7;
+}
+
+// 更新用户请求参数
+message UpdateUserReply {
+    // 是否成功
+    bool is_success = 1;
+    // 错误代码(9001 用户不存在,9002 用户名已经存在,9004 机构编号不存在)
+    string error_code = 2;
+}
+
+// 修改密码请求参数
+message ModifyPasswordRequest {
+    // 用户ID
+    string user_id = 1;
+    // 原始密码
+    string old_password = 2;
+    // 新密码
+    string new_password = 3;
+}
+
+// 修改密码响应参数
+message ModifyPasswordReply {
+    // 是否成功
+    bool is_success = 1;
+    // 错误代码(9001 用户不存在,9003 原始密码不正确)
+    string error_code = 2;
+}
+
+// 查询机构树请求参数
+message QueryOrgTreeRequest {
+    // 操作用户
+    string operator = 1;
+    // 父级编号（可空，为空则查询全部）
+    string parent_code = 2;
+    // 机构类型编号(可空)
+    string type_code = 3;
+}
+
+// 查询机构树响应参数
+message QueryOrgTreeReply {
+     // 机构
+     message Org {
+        // 机构编号
+        string code = 2;
+        // 机构名称
+        string name = 3;
+        // 机构类型编号
+        string type_code = 4;
+        // 子级菜单
+        repeated Org children = 5;
+    }
+
+    repeated Org results = 1; 
+}
+
+// 查询角色列表请求参数
+message QueryRolesRequest {
+     // 操作用户
+     string operator = 1;
+}
+
+// 查询角色列表响应参数
+message QueryRolesReply {
+   message Role {
+        // 角色编号
+        string code = 1;
+        // 角色名称
+        string name = 2;
+   }
+   repeated Role roles = 1;
+}
+
+// ResetPasswordRequest 重置密码请求参数
+message ResetPasswordRequest {
+    // 操作用户
+    string operator = 1;
+    // 用户ID
+    string user_id = 2;
+}
+
+// ResetPasswordReply 重置密码响应参数
+message ResetPasswordReply {
+     // 是否成功
+     bool is_success = 1;
+     // 错误代码(9001 用户不存在)
+     string error_code = 2;
+}
+
+// 删除用户请求参数
+message DeleteUserRequest {
+    // 操作用户
+    string operator = 1;
+    // 用户ID
+    string user_id = 2;
+}
+
+// 删除用户响应参数
+message DeleteUserReply {
+    // 是否成功
+    bool is_success = 1;
+    // 错误代码(9001 用户不存在)
+    string error_code = 2;
+}
+
+// 获取客户端请求参数
+message GetClientRequest {
+    string client_id = 1;
+}
+
+// 获取客户端响应参数
+message GetClientReply {
+    // 客户端ID
+    string client_id = 1;
+    // 客户端秘钥
+    string client_secret = 2;
+    // 允许的授权模式(1<<1:授权码模式 1<<2:简化模式 1<<3:密码模式 1<<4:客户端模式 1<<5:刷新令牌模式)
+    int32 allow_grant = 3;
+    // 域名
+    string domain = 4;
+}

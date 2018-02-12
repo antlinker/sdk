@@ -78,7 +78,7 @@ func (h *Handle) request(typ string, rdata interface{}) (err error) {
 	}
 
 	data, err := utils.PostJSON(ctx, h.getURL(jobRouter), body, func(req *http.Request) (*http.Request, error) {
-		token, err := asapi.GetToken()
+		token, err := h.auh.GetToken()
 		if err != nil {
 			return nil, err
 		}
