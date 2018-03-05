@@ -47,7 +47,7 @@ func (h *Handle) Add(req *AddRequest) (err error) {
 
 	mreq := map[string]interface{}{
 		"MT":           "ADDTODO",
-		"AID":          uuid.NewV4().String(),
+		"AID":          uuid.Must(uuid.NewV4()).String(),
 		"UIDs":         auids,
 		"TodoType":     req.TodoType,
 		"ContentValue": req.ContentValue,
