@@ -213,7 +213,7 @@ func (h *Handle) ModifyStaffClassName(university, deptID, deptName string) (err 
 }
 
 // ModifyStudentGraduate 更改已毕业学生离校状态
-func (h *Handle) ModifyStudentGraduate(university, usercode []string) (err error) {
+func (h *Handle) ModifyStudentGraduate(university string, usercode ...string) (err error) {
 	body := map[string]interface{}{
 		"University": university,
 		"UserCode":   usercode,
