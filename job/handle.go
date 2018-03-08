@@ -211,3 +211,13 @@ func (h *Handle) ModifyStaffClassName(university, deptID, deptName string) (err 
 
 	return
 }
+
+// ModifyStudentGraduate 更改已毕业学生离校状态
+func (h *Handle) ModifyStudentGraduate(university, usercode []string) (err error) {
+	body := map[string]interface{}{
+		"University": university,
+		"UserCode":   usercode,
+	}
+	err = h.request("studentGrauateType", body)
+	return
+}

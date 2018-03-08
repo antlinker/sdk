@@ -59,3 +59,9 @@ func ModifyStaffClassName(university, deptID, deptName string) (err error) {
 	err = gHandle.ModifyStaffClassName(university, deptID, deptName)
 	return
 }
+
+// ModifyStudentGraduate 更改已毕业学生离校状态
+func ModifyStudentGraduate(university, usercode []string) (err error) {
+	err = gHandle.ModifyStudentGraduate(university, usercode)
+	return
+}
