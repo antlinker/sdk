@@ -455,6 +455,29 @@ func (ah *AuthorizeHandle) GetStaffParam(identify, uid string) (buID, addr strin
 	return
 }
 
+// GetAntStaffParamResult 获取ANT用户学工参数查询结果
+type GetAntStaffParamResult struct {
+	BuID          string
+	Addr          string
+	University    string
+	IntelUserCode string
+}
+
+// GetAntStaffParam 获取ANT用户学工参数
+func (ah *AuthorizeHandle) GetAntStaffParam(uid string) (*GetAntStaffParamResult, *ErrorResult) {
+	body := map[string]interface{}{
+		"ServiceIdentify": "ANT",
+		"UID":             uid,
+	}
+
+	var resData GetAntStaffParamResult
+	result := ah.tokenPost("/api/authorize/getstaffparam", body, &resData)
+	if result != nil {
+		return nil, result
+	}
+	return &resData, nil
+}
+
 // AuthorizeMergeTELUserRequest 合并手机号用户请求参数
 type AuthorizeMergeTELUserRequest struct {
 	MUID string

@@ -126,6 +126,11 @@ func GetStaffParam(identify, uid string) (buID, addr string, result *ErrorResult
 	return
 }
 
+// GetAntStaffParam 获取ANT用户学工参数
+func GetAntStaffParam(uid string) (*GetAntStaffParamResult, *ErrorResult) {
+	return gAuthorize.GetAntStaffParam(uid)
+}
+
 // UserLoginToken 用户登录令牌
 func UserLoginToken(userName, password, service string) (tokenInfo *UserTokenInfo, result *ErrorResult) {
 	tokenInfo, result = gAuthorize.UserLoginToken(userName, password, service)
