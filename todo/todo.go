@@ -77,3 +77,9 @@ func Del(req *DelRequest) (err error) {
 	err = gHandle.Del(req)
 	return
 }
+
+// Delay 延期待办
+func Delay(req *DelayRequest) (err error) {
+	err = gHandle.Delay(req)
+	return
+}
