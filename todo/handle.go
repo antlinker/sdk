@@ -123,6 +123,25 @@ func (h *Handle) Del(req *DelRequest) (err error) {
 	return
 }
 
+// DelayRequest 延期待办请求参数
+type DelayRequest struct {
+	BuID     string
+	TodoType string
+	EndTime  string
+}
+
+// Del 延期待办
+func (h *Handle) Delay(req *DelayRequest) (err error) {
+	mreq := map[string]interface{}{
+		"MT":       "DELAYTODO",
+		"BuID":     req.BuID,
+		"TodoType": req.TodoType,
+		"EndTime":  req.EndTime,
+	}
+	err = h.publish(mreq)
+	return
+}
+
 func (h *Handle) publish(data interface{}) (err error) {
 	buf, err := json.Marshal(data)
 	if err != nil {
