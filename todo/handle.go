@@ -127,7 +127,7 @@ func (h *Handle) Del(req *DelRequest) (err error) {
 type DelayRequest struct {
 	BuID     string
 	TodoType string
-	EndTime  string
+	EndTime  time.Time
 }
 
 // Del 延期待办
@@ -138,6 +138,11 @@ func (h *Handle) Delay(req *DelayRequest) (err error) {
 		"TodoType": req.TodoType,
 		"EndTime":  req.EndTime,
 	}
+
+	if !req.EndTime.IsZero() {
+		mreq["EndTime"] = req.EndTime.Format("20060102150405")
+	}
+
 	err = h.publish(mreq)
 	return
 }
