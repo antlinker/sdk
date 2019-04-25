@@ -137,6 +137,11 @@ func UserLoginToken(userName, password, service string) (tokenInfo *UserTokenInf
 	return
 }
 
+// GetAccessTokenByPassword 使用密码模式获取访问令牌
+func GetAccessTokenByPassword(params PasswordRequest) (*UserTokenInfo, *ErrorResult) {
+	return gAuthorize.GetAccessTokenByPassword(params)
+}
+
 // UserRefreshToken 用户更新令牌
 func UserRefreshToken(rtoken string) (tokenInfo *UserTokenInfo, result *ErrorResult) {
 	tokenInfo, result = gAuthorize.UserRefreshToken(rtoken)

@@ -355,38 +355,59 @@ type UserTokenInfo struct {
 }
 
 // UserLoginToken 用户登录令牌
-func (ah *AuthorizeHandle) UserLoginToken(userName, password, service string) (tokenInfo *UserTokenInfo, result *ErrorResult) {
+func (ah *AuthorizeHandle) UserLoginToken(userName, password, service string) (*UserTokenInfo, *ErrorResult) {
+	return ah.GetAccessTokenByPassword(PasswordRequest{
+		ClientID:     ah.GetConfig().ClientID,
+		ClientSecret: ah.GetConfig().ClientSecret,
+		LoginModel:   1,
+		UserName:     userName,
+		Service:      service,
+		Password:     password,
+	})
+}
 
+// PasswordRequest 密码模式请求参数
+type PasswordRequest struct {
+	ClientID     string // 客户端ID
+	ClientSecret string // 客户端秘钥
+	LoginModel   int    // 登录模式（1手机号、身份证号登录,2学校、学号登录）
+	University   string // 学校编号
+	UserName     string // 用户名
+	Service      string // 服务标识
+	Password     string // 密码
+}
+
+// GetAccessTokenByPassword 使用密码模式获取访问令牌
+func (ah *AuthorizeHandle) GetAccessTokenByPassword(params PasswordRequest) (*UserTokenInfo, *ErrorResult) {
 	reqHandle := func(req *httplib.BeegoHTTPRequest) (*httplib.BeegoHTTPRequest, *ErrorResult) {
-		req = req.SetBasicAuth(ah.GetConfig().ClientID, ah.GetConfig().ClientSecret)
+		req = req.SetBasicAuth(params.ClientID, params.ClientSecret)
 		req = req.Param("grant_type", "password")
 
-		var userInfo = struct {
-			LoginModel int
-			UserName   string
-			Service    string
-		}{
-			LoginModel: 1,
-			UserName:   userName,
-			Service:    service,
+		info := map[string]interface{}{
+			"Service":    params.Service,
+			"LoginModel": params.LoginModel,
+			"UserName":   params.UserName,
+			"University": params.University,
 		}
-		buf, _ := json.Marshal(userInfo)
+		buf, err := json.Marshal(info)
+		if err != nil {
+			return nil, NewErrorResult(err.Error())
+		}
 
 		userName := base64.StdEncoding.EncodeToString(buf)
 		req = req.Param("username", userName)
-		req = req.Param("password", password)
+		req = req.Param("password", params.Password)
 
 		return req, nil
 	}
 
 	var info UserTokenInfo
-	result = ah.request("/oauth2/token", http.MethodPost, reqHandle, &info)
+	result := ah.request("/oauth2/token", http.MethodPost, reqHandle, &info)
 	if result != nil {
-		return
+		return nil, result
 	}
-	tokenInfo = &info
 
-	return
+	return &info, nil
 }
 
 // UserRefreshToken 用户更新令牌
