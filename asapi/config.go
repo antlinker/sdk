@@ -13,6 +13,7 @@ type Config struct {
 	ServiceIdentify string // 服务标识
 	IsEnabledCache  bool   // 是否启用缓存
 	CacheGCInterval int    // 缓存gc间隔(单位秒)
+	MaxConns        int
 }
 
 // GetURL 获取请求的URL
