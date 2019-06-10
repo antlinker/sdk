@@ -39,7 +39,6 @@ func TestTokenHandle_ForceGet(t *testing.T) {
 				} else {
 					t.Logf("Access Token:%+v\n", token)
 				}
-				// time.Sleep(100 * time.Millisecond)
 			}
 		}(j)
 	}

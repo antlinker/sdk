@@ -22,10 +22,13 @@ func NewTokenHandle(cfg *Config) *TokenHandle {
 	t := &TokenHandle{
 		cfg: cfg,
 	}
-	if cfg.MaxConns < 0 {
+	if cfg.MaxConns == 0 {
+		t.transport = &http.Transport{
+			DisableKeepAlives: true,
+		}
 		return t
 	}
-	if cfg.MaxConns == 0 {
+	if cfg.MaxConns < 0 {
 		cfg.MaxConns = 10
 	}
 	t.transport = &http.Transport{
