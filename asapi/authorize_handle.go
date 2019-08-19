@@ -112,6 +112,7 @@ type LoginUserInfo struct {
 	Password        string // 登录密码
 	DefaultPassword string // 默认登录密码
 	University      string // 学校ID
+	UserType        string // 用户类型
 }
 
 // VerifyLogin 验证登录
