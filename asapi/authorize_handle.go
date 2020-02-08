@@ -1,9 +1,12 @@
 package asapi
 
 import (
+	"crypto/md5"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/antlinker/go-cache"
@@ -22,6 +25,9 @@ func NewAuthorizeHandle(cfg *Config) *AuthorizeHandle {
 			ah.cfg.CacheGCInterval = 300
 		}
 		ah.cache = cache.New(0, time.Second*time.Duration(ah.cfg.CacheGCInterval))
+		// 加入两个接口缓存
+		ah.routerCache = cache.New(0, time.Second*time.Duration(ah.cfg.CacheGCInterval))
+		ah.setRouter()
 	}
 
 	return ah
@@ -29,9 +35,74 @@ func NewAuthorizeHandle(cfg *Config) *AuthorizeHandle {
 
 // AuthorizeHandle 授权处理
 type AuthorizeHandle struct {
-	cfg   *Config
-	th    *TokenHandle
-	cache *cache.Cache
+	cfg         *Config
+	th          *TokenHandle
+	cache       *cache.Cache
+	routerCache *cache.Cache
+	routerMap   sync.Map
+}
+
+// setRouter 设置需要缓存的路由地址
+func (ah *AuthorizeHandle) setRouter() {
+	ah.routerMap.Store("/api/authorize/getstaffparam", 60)
+	ah.routerMap.Store("/api/authorize/antuidbyuniversity", 60)
+}
+
+// getRouterExpires 查询路由缓存时间
+func (ah *AuthorizeHandle) getRouterExpires(s string) (expires int64) {
+	v, ok := ah.routerMap.Load(s)
+	if !ok {
+		return -1
+	}
+	expires = v.(int64)
+	return
+}
+
+// getFromRouterCache 从路由的缓存中读数据
+func (ah *AuthorizeHandle) getFromRouterCache(router string, body interface{}) (v interface{}) {
+	if !ah.cfg.IsEnabledCache {
+		return
+	}
+	key := ah.key(router, body)
+	expires := ah.getRouterExpires(key)
+	if expires <= 0 {
+		return
+	}
+
+	var ok bool
+	// 检查缓存数据
+	v, ok = ah.cache.Get(key)
+	if !ok {
+		return nil
+	}
+	return
+}
+
+func (ah *AuthorizeHandle) setRouterCache(router string, body, v interface{}) (err error) {
+	defer func() {
+		if e := recover(); e != nil {
+			err = fmt.Errorf("panic:%s", e)
+		}
+	}()
+	if !ah.cfg.IsEnabledCache {
+		return nil
+	}
+	key := ah.key(router, body)
+	expires := ah.getRouterExpires(key)
+	if expires <= 0 {
+		return nil
+	}
+	ah.routerCache.Set(key, v, time.Duration(expires)*time.Second)
+	return nil
+}
+
+func (ah *AuthorizeHandle) key(router string, body interface{}) string {
+	m := map[string]interface{}{
+		"router": router,
+		"body":   body,
+	}
+	b, _ := json.Marshal(m)
+	return fmt.Sprintf("%x", md5.Sum(b))
 }
 
 // 请求数据
@@ -77,6 +148,11 @@ func (ah *AuthorizeHandle) request(router, method string, reqHandle func(req *ht
 
 // 带有访问令牌的post请求
 func (ah *AuthorizeHandle) tokenPost(router string, body, v interface{}) (result *ErrorResult) {
+	// 从缓存读取
+	if v = ah.getFromRouterCache(router, body); v != nil {
+		return
+	}
+
 	reqHandle := func(req *httplib.BeegoHTTPRequest) (*httplib.BeegoHTTPRequest, *ErrorResult) {
 		token, result := ah.th.Get()
 		if result != nil {
@@ -95,6 +171,11 @@ func (ah *AuthorizeHandle) tokenPost(router string, body, v interface{}) (result
 		return req, nil
 	}
 	result = ah.request(router, http.MethodPost, reqHandle, v)
+	if result != nil {
+		return
+	}
+	// 设置缓存
+	go ah.setRouterCache(router, body, v)
 	return
 }
 
