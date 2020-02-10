@@ -606,8 +606,8 @@ func (ah *AuthorizeHandle) ClearAuth(req *ClearAuthRequest) (result *ErrorResult
 
 // GetUserCode 根据用户ID获取UserCode
 func (ah *AuthorizeHandle) GetUserCode(uid string) (userCode string, result *ErrorResult) {
-	body := map[string]interface{}{
-		"UID": uid,
+	body := &GetUserCodeRequest{
+		UID: uid,
 	}
 
 	var res struct {
