@@ -22,6 +22,8 @@ func NewAuthorizeHandle(cfg *Config) *AuthorizeHandle {
 			ah.cfg.CacheGCInterval = 300
 		}
 		ah.cache = cache.New(0, time.Second*time.Duration(ah.cfg.CacheGCInterval))
+		// 加入两个接口缓存
+		ah.routerCache = cache.New(0, time.Second*time.Duration(ah.cfg.CacheGCInterval))
 	}
 
 	return ah
@@ -29,9 +31,49 @@ func NewAuthorizeHandle(cfg *Config) *AuthorizeHandle {
 
 // AuthorizeHandle 授权处理
 type AuthorizeHandle struct {
-	cfg   *Config
-	th    *TokenHandle
-	cache *cache.Cache
+	cfg         *Config
+	th          *TokenHandle
+	cache       *cache.Cache
+	routerCache *cache.Cache
+}
+
+// getFromRouterCache 从路由的缓存中读数据
+func (ah *AuthorizeHandle) getFromRouterCache(router string, r RequestReader) (b []byte, ok bool) {
+	if !ah.cfg.IsEnabledCache {
+		return
+	}
+	if r.Expires(router) <= 0 {
+		ok = false
+		return
+	}
+	key := r.Hash()
+	if key == "" {
+		return
+	}
+
+	// 检查缓存数据
+	v, ok := ah.routerCache.Get(key)
+	if !ok || v == nil {
+		return
+	}
+	b, ok = v.([]byte)
+	return
+}
+
+func (ah *AuthorizeHandle) setRouterCache(router string, r RequestReader, v interface{}) {
+	if !ah.cfg.IsEnabledCache {
+		return
+	}
+	expires := r.Expires(router)
+	if expires <= 0 {
+		return
+	}
+	key := r.Hash()
+	if key == "" {
+		return
+	}
+	b, _ := json.Marshal(v)
+	ah.routerCache.Set(key, b, time.Duration(expires)*time.Second)
 }
 
 // 请求数据
@@ -67,7 +109,8 @@ func (ah *AuthorizeHandle) request(router, method string, reqHandle func(req *ht
 		err = json.Unmarshal(buf, v)
 		if err != nil {
 			result = NewErrorResult(err.Error())
-		}
+			return
+		} // 设置缓存
 	default:
 		result = NewErrorResult(string(buf), res.StatusCode)
 	}
@@ -77,6 +120,25 @@ func (ah *AuthorizeHandle) request(router, method string, reqHandle func(req *ht
 
 // 带有访问令牌的post请求
 func (ah *AuthorizeHandle) tokenPost(router string, body, v interface{}) (result *ErrorResult) {
+	// 从缓存读取
+	reader, shouldCached := body.(RequestReader)
+	if shouldCached {
+		b, exists := ah.getFromRouterCache(router, reader)
+		if exists {
+			if len(b) == 0 {
+				return
+			}
+			if v == nil {
+				return
+			}
+			if err := json.Unmarshal(b, v); err != nil {
+				result = NewErrorResult(err.Error())
+			}
+			// println(router, "cached")
+			return
+		}
+	}
+
 	reqHandle := func(req *httplib.BeegoHTTPRequest) (*httplib.BeegoHTTPRequest, *ErrorResult) {
 		token, result := ah.th.Get()
 		if result != nil {
@@ -95,6 +157,12 @@ func (ah *AuthorizeHandle) tokenPost(router string, body, v interface{}) (result
 		return req, nil
 	}
 	result = ah.request(router, http.MethodPost, reqHandle, v)
+	if result != nil {
+		return
+	}
+	if shouldCached {
+		ah.setRouterCache(router, reader, v)
+	}
 	return
 }
 
@@ -456,9 +524,9 @@ func (ah *AuthorizeHandle) MergeUser(req *AuthorizeMergeUserRequest) (result *Er
 
 // GetStaffParam 获取学工请求参数
 func (ah *AuthorizeHandle) GetStaffParam(identify, uid string) (buID, addr string, result *ErrorResult) {
-	body := map[string]interface{}{
-		"ServiceIdentify": identify,
-		"UID":             uid,
+	body := &GetStaffParamRequest{
+		ServiceIdentify: identify,
+		UID:             uid,
 	}
 
 	var resData struct {
@@ -487,9 +555,9 @@ type GetAntStaffParamResult struct {
 
 // GetAntStaffParam 获取ANT用户学工参数
 func (ah *AuthorizeHandle) GetAntStaffParam(uid string) (*GetAntStaffParamResult, *ErrorResult) {
-	body := map[string]interface{}{
-		"ServiceIdentify": "ANT",
-		"UID":             uid,
+	body := &GetStaffParamRequest{
+		ServiceIdentify: "ANT",
+		UID:             uid,
 	}
 
 	var resData GetAntStaffParamResult
@@ -731,10 +799,10 @@ func (ah *AuthorizeHandle) GetAntUIDList(service string, uids ...string) (auids 
 
 // GetAntUIDByUniversity 根据学校查询ANT用户ID
 func (ah *AuthorizeHandle) GetAntUIDByUniversity(userID, university string) (uid string, result *ErrorResult) {
-	body := map[string]interface{}{
-		"ServiceIdentify": ah.cfg.ServiceIdentify,
-		"UserID":          userID,
-		"University":      university,
+	body := &GetAntUIDByUniversityRequest{
+		ServiceIdentify: ah.cfg.ServiceIdentify,
+		UserID:          userID,
+		University:      university,
 	}
 
 	var res struct {
