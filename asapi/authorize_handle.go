@@ -38,12 +38,8 @@ type AuthorizeHandle struct {
 }
 
 // getFromRouterCache 从路由的缓存中读数据
-func (ah *AuthorizeHandle) getFromRouterCache(router string, body interface{}) (b []byte, ok bool) {
+func (ah *AuthorizeHandle) getFromRouterCache(router string, r RequestReader) (b []byte, ok bool) {
 	if !ah.cfg.IsEnabledCache {
-		return
-	}
-	r, ok := body.(RequestReader)
-	if !ok {
 		return
 	}
 	if r.Expires(router) <= 0 {
@@ -64,12 +60,8 @@ func (ah *AuthorizeHandle) getFromRouterCache(router string, body interface{}) (
 	return
 }
 
-func (ah *AuthorizeHandle) setRouterCache(router string, body, v interface{}) {
+func (ah *AuthorizeHandle) setRouterCache(router string, r RequestReader, v interface{}) {
 	if !ah.cfg.IsEnabledCache {
-		return
-	}
-	r, ok := body.(RequestReader)
-	if !ok {
 		return
 	}
 	expires := r.Expires(router)
@@ -129,19 +121,22 @@ func (ah *AuthorizeHandle) request(router, method string, reqHandle func(req *ht
 // 带有访问令牌的post请求
 func (ah *AuthorizeHandle) tokenPost(router string, body, v interface{}) (result *ErrorResult) {
 	// 从缓存读取
-	b, ok := ah.getFromRouterCache(router, body)
-	if ok {
-		if len(b) == 0 {
+	reader, shouldCached := body.(RequestReader)
+	if shouldCached {
+		b, exists := ah.getFromRouterCache(router, reader)
+		if exists {
+			if len(b) == 0 {
+				return
+			}
+			if v == nil {
+				return
+			}
+			if err := json.Unmarshal(b, v); err != nil {
+				result = NewErrorResult(err.Error())
+			}
+			// println(router, "cached")
 			return
 		}
-		if v == nil {
-			return
-		}
-		if err := json.Unmarshal(b, v); err != nil {
-			result = NewErrorResult(err.Error())
-		}
-		// println(router, "cached")
-		return
 	}
 
 	reqHandle := func(req *httplib.BeegoHTTPRequest) (*httplib.BeegoHTTPRequest, *ErrorResult) {
@@ -165,8 +160,9 @@ func (ah *AuthorizeHandle) tokenPost(router string, body, v interface{}) (result
 	if result != nil {
 		return
 	}
-	ah.setRouterCache(router, body, v)
-
+	if shouldCached {
+		ah.setRouterCache(router, reader, v)
+	}
 	return
 }
 

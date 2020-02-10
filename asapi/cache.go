@@ -3,12 +3,17 @@ package asapi
 import (
 	"crypto/md5"
 	"fmt"
+	"sync"
 )
 
+// 部分接口缓存时间，默认60秒，可以使用SetRouterExpires函数重置特定的接口缓存时间
 var routerCached = map[string]int64{
 	"/api/authorize/getstaffparam":      60,
 	"/api/authorize/antuidbyuniversity": 60,
+	"/api/authorize/usercode":           60,
 }
+
+var routerLock sync.Mutex
 
 // RequestReader 请求
 type RequestReader interface {
@@ -27,7 +32,7 @@ type GetStaffParamRequest struct {
 
 // Hash 根据请求中的ServiceIdentify和UID拼接后返回md5值
 func (r *GetStaffParamRequest) Hash() string {
-	s := fmt.Sprintf("getstaffparam:%s:%s", r.ServiceIdentify, r.UID)
+	s := fmt.Sprintf("/api/authorize/getstaffparam:%s:%s", r.ServiceIdentify, r.UID)
 	return fmt.Sprintf("%x", md5.Sum([]byte(s)))
 }
 
@@ -45,7 +50,7 @@ type GetAntUIDByUniversityRequest struct {
 
 // Hash 获取学工绑定集结号账号的UID请求参数的哈希值
 func (r *GetAntUIDByUniversityRequest) Hash() string {
-	s := fmt.Sprintf("antuidbyuniversity:%s:%s:%s",
+	s := fmt.Sprintf("/api/authorize/antuidbyuniversity:%s:%s:%s",
 		r.ServiceIdentify, r.UserID, r.University)
 	return fmt.Sprintf("%x", md5.Sum([]byte(s)))
 }
@@ -55,11 +60,29 @@ func (r *GetAntUIDByUniversityRequest) Expires(router string) int64 {
 	return routerCached[router]
 }
 
+// GetUserCodeRequest 查询用户学号的接口
+type GetUserCodeRequest struct {
+	UID string `json:"UID"`
+}
+
+// Hash 返回查询用户学(工)号时请求的哈希值
+func (r *GetUserCodeRequest) Hash() string {
+	s := fmt.Sprintf("/api/authorize/usercode:%s", r.UID)
+	return fmt.Sprintf("%x", md5.Sum([]byte(s)))
+}
+
+// Expires 返回获取学工号的请求响应结果缓存时间
+func (r *GetUserCodeRequest) Expires(router string) int64 {
+	return routerCached[router]
+}
+
 // SetRouterExpires 设置启用了缓存的接口的过期时间
 func SetRouterExpires(m map[string]int64) {
+	routerLock.Lock()
 	for k, v := range m {
 		if _, ok := routerCached[k]; ok {
 			routerCached[k] = v
 		}
 	}
+	routerLock.Unlock()
 }

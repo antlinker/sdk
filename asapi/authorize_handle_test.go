@@ -37,3 +37,39 @@ func TestGetStaffParam(t *testing.T) {
 		t.Logf("GetAntStaffParam info: %s", info)
 	}
 }
+
+func BenchmarkGetStaffParamNoCached(b *testing.B) {
+	SetRouterExpires(map[string]int64{
+		"/api/authorize/getstaffparam": 0,
+	})
+	for i := 0; i < b.N; i++ {
+		_ah.GetAntStaffParam("AA0000125923")
+	}
+}
+
+func BenchmarkGetStaffParamCached(b *testing.B) {
+	SetRouterExpires(map[string]int64{
+		"/api/authorize/getstaffparam": 60,
+	})
+	for i := 0; i < b.N; i++ {
+		_ah.GetAntStaffParam("AA0000125923")
+	}
+}
+
+func BenchmarkGetAntUIDNoCached(b *testing.B) {
+	SetRouterExpires(map[string]int64{
+		"/api/authorize/antuidbyuniversity": 0,
+	})
+	for i := 0; i < b.N; i++ {
+		_ah.GetAntUIDByUniversity("fa6d77be-11a6-4c29-bdb1-a86efa450f29", "11906")
+	}
+}
+
+func BenchmarkGetAntUIDCached(b *testing.B) {
+	SetRouterExpires(map[string]int64{
+		"/api/authorize/antuidbyuniversity": 60,
+	})
+	for i := 0; i < b.N; i++ {
+		_ah.GetAntUIDByUniversity("fa6d77be-11a6-4c29-bdb1-a86efa450f29", "11906")
+	}
+}
