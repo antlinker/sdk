@@ -1,12 +1,9 @@
 package asapi
 
 import (
-	"crypto/md5"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/antlinker/go-cache"
@@ -27,7 +24,6 @@ func NewAuthorizeHandle(cfg *Config) *AuthorizeHandle {
 		ah.cache = cache.New(0, time.Second*time.Duration(ah.cfg.CacheGCInterval))
 		// 加入两个接口缓存
 		ah.routerCache = cache.New(0, time.Second*time.Duration(ah.cfg.CacheGCInterval))
-		ah.setRouter()
 	}
 
 	return ah
@@ -39,70 +35,53 @@ type AuthorizeHandle struct {
 	th          *TokenHandle
 	cache       *cache.Cache
 	routerCache *cache.Cache
-	routerMap   sync.Map
-}
-
-// setRouter 设置需要缓存的路由地址
-func (ah *AuthorizeHandle) setRouter() {
-	ah.routerMap.Store("/api/authorize/getstaffparam", 60)
-	ah.routerMap.Store("/api/authorize/antuidbyuniversity", 60)
-}
-
-// getRouterExpires 查询路由缓存时间
-func (ah *AuthorizeHandle) getRouterExpires(s string) (expires int64) {
-	v, ok := ah.routerMap.Load(s)
-	if !ok {
-		return -1
-	}
-	expires = v.(int64)
-	return
 }
 
 // getFromRouterCache 从路由的缓存中读数据
-func (ah *AuthorizeHandle) getFromRouterCache(router string, body interface{}) (v interface{}) {
+func (ah *AuthorizeHandle) getFromRouterCache(router string, body interface{}) (b []byte, ok bool) {
 	if !ah.cfg.IsEnabledCache {
 		return
 	}
-	key := ah.key(router, body)
-	expires := ah.getRouterExpires(key)
-	if expires <= 0 {
+	r, ok := body.(RequestReader)
+	if !ok {
+		return
+	}
+	if r.Expires(router) <= 0 {
+		ok = false
+		return
+	}
+	key := r.Hash()
+	if key == "" {
 		return
 	}
 
-	var ok bool
 	// 检查缓存数据
-	v, ok = ah.cache.Get(key)
-	if !ok {
-		return nil
+	v, ok := ah.routerCache.Get(key)
+	if !ok || v == nil {
+		return
 	}
+	b, ok = v.([]byte)
 	return
 }
 
-func (ah *AuthorizeHandle) setRouterCache(router string, body, v interface{}) (err error) {
-	defer func() {
-		if e := recover(); e != nil {
-			err = fmt.Errorf("panic:%s", e)
-		}
-	}()
+func (ah *AuthorizeHandle) setRouterCache(router string, body, v interface{}) {
 	if !ah.cfg.IsEnabledCache {
-		return nil
+		return
 	}
-	key := ah.key(router, body)
-	expires := ah.getRouterExpires(key)
+	r, ok := body.(RequestReader)
+	if !ok {
+		return
+	}
+	expires := r.Expires(router)
 	if expires <= 0 {
-		return nil
+		return
 	}
-	ah.routerCache.Set(key, v, time.Duration(expires)*time.Second)
-	return nil
-}
-
-func (ah *AuthorizeHandle) key(router string, body interface{}) string {
-	m := map[string]interface{}{
-		"router": router,
-		"body":   body,
+	key := r.Hash()
+	if key == "" {
+		return
 	}
-	b, _ := json.Marshal(m)
-	return fmt.Sprintf("%x", md5.Sum(b))
+	b, _ := json.Marshal(v)
+	ah.routerCache.Set(key, b, time.Duration(expires)*time.Second)
 }
 
 // 请求数据
@@ -138,7 +117,8 @@ func (ah *AuthorizeHandle) request(router, method string, reqHandle func(req *ht
 		err = json.Unmarshal(buf, v)
 		if err != nil {
 			result = NewErrorResult(err.Error())
-		}
+			return
+		} // 设置缓存
 	default:
 		result = NewErrorResult(string(buf), res.StatusCode)
 	}
@@ -149,7 +129,18 @@ func (ah *AuthorizeHandle) request(router, method string, reqHandle func(req *ht
 // 带有访问令牌的post请求
 func (ah *AuthorizeHandle) tokenPost(router string, body, v interface{}) (result *ErrorResult) {
 	// 从缓存读取
-	if v = ah.getFromRouterCache(router, body); v != nil {
+	b, ok := ah.getFromRouterCache(router, body)
+	if ok {
+		if len(b) == 0 {
+			return
+		}
+		if v == nil {
+			return
+		}
+		if err := json.Unmarshal(b, v); err != nil {
+			result = NewErrorResult(err.Error())
+		}
+		// println(router, "cached")
 		return
 	}
 
@@ -174,8 +165,8 @@ func (ah *AuthorizeHandle) tokenPost(router string, body, v interface{}) (result
 	if result != nil {
 		return
 	}
-	// 设置缓存
-	go ah.setRouterCache(router, body, v)
+	ah.setRouterCache(router, body, v)
+
 	return
 }
 
@@ -537,9 +528,9 @@ func (ah *AuthorizeHandle) MergeUser(req *AuthorizeMergeUserRequest) (result *Er
 
 // GetStaffParam 获取学工请求参数
 func (ah *AuthorizeHandle) GetStaffParam(identify, uid string) (buID, addr string, result *ErrorResult) {
-	body := map[string]interface{}{
-		"ServiceIdentify": identify,
-		"UID":             uid,
+	body := &GetStaffParamRequest{
+		ServiceIdentify: identify,
+		UID:             uid,
 	}
 
 	var resData struct {
@@ -568,9 +559,9 @@ type GetAntStaffParamResult struct {
 
 // GetAntStaffParam 获取ANT用户学工参数
 func (ah *AuthorizeHandle) GetAntStaffParam(uid string) (*GetAntStaffParamResult, *ErrorResult) {
-	body := map[string]interface{}{
-		"ServiceIdentify": "ANT",
-		"UID":             uid,
+	body := &GetStaffParamRequest{
+		ServiceIdentify: "ANT",
+		UID:             uid,
 	}
 
 	var resData GetAntStaffParamResult
@@ -812,10 +803,10 @@ func (ah *AuthorizeHandle) GetAntUIDList(service string, uids ...string) (auids 
 
 // GetAntUIDByUniversity 根据学校查询ANT用户ID
 func (ah *AuthorizeHandle) GetAntUIDByUniversity(userID, university string) (uid string, result *ErrorResult) {
-	body := map[string]interface{}{
-		"ServiceIdentify": ah.cfg.ServiceIdentify,
-		"UserID":          userID,
-		"University":      university,
+	body := &GetAntUIDByUniversityRequest{
+		ServiceIdentify: ah.cfg.ServiceIdentify,
+		UserID:          userID,
+		University:      university,
 	}
 
 	var res struct {
