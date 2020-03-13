@@ -386,6 +386,44 @@ func (ah *AuthorizeHandle) VerifyToken(token string) (userID, clientID string, r
 	return
 }
 
+// VerifyTokenInfo 验证令牌的响应
+type VerifyTokenInfo struct {
+	UserID      string `json:"user_id"`
+	BusinessID  string `json:"business_id"`
+	UserCode    string `json:"user_code"`
+	ClientID    string `json:"client_id"`
+	ExpiresIn   int    `json:"expires_in"`
+	ServiceCode string `json:"service_code"`
+	ServiceAddr string `json:"service_addr"`
+}
+
+// VerifyTokenV2 验证令牌
+func (ah *AuthorizeHandle) VerifyTokenV2(token string) (*VerifyTokenInfo, *ErrorResult) {
+	if ah.cfg.IsEnabledCache {
+		// 检查缓存数据
+		if at, ok := ah.cache.Get(token); ok {
+			if atm, ok := at.(*VerifyTokenInfo); ok {
+				return atm, nil
+			}
+		}
+	}
+	reqHandle := func(req *httplib.BeegoHTTPRequest) (*httplib.BeegoHTTPRequest, *ErrorResult) {
+		req = req.Param("access_token", token)
+		req = req.Param("service", ah.GetConfig().ServiceIdentify)
+		return req, nil
+	}
+
+	var resData VerifyTokenInfo
+	if result := ah.request("/oauth2/verify",
+		http.MethodGet, reqHandle, &resData); result != nil {
+		return nil, result
+	}
+	if ah.cfg.IsEnabledCache && ah.cfg.CacheGCInterval < resData.ExpiresIn {
+		ah.cache.Set(token, resData, time.Duration(resData.ExpiresIn-ah.cfg.CacheGCInterval)*time.Second)
+	}
+	return &resData, nil
+}
+
 // GetUpgradeToken 获取升级令牌
 func (ah *AuthorizeHandle) GetUpgradeToken(password, uid, clientID, clientSecret string) (info map[string]interface{}, result *ErrorResult) {
 
