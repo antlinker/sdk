@@ -108,6 +108,11 @@ func VerifyToken(token string) (userID, clientID string, result *ErrorResult) {
 	return
 }
 
+// VerifyTokenV2 验证令牌
+func VerifyTokenV2(token string) (info *VerifyTokenInfo, result *ErrorResult) {
+	return gAuthorize.VerifyTokenV2(token)
+}
+
 // GetUpgradeToken 获取升级令牌
 func GetUpgradeToken(password, uid, clientID, clientSecret string) (info map[string]interface{}, result *ErrorResult) {
 	info, result = gAuthorize.GetUpgradeToken(password, uid, clientID, clientSecret)
