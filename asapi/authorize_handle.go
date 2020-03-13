@@ -419,7 +419,7 @@ func (ah *AuthorizeHandle) VerifyTokenV2(token string) (*VerifyTokenInfo, *Error
 		return nil, result
 	}
 	if ah.cfg.IsEnabledCache && ah.cfg.CacheGCInterval < resData.ExpiresIn {
-		ah.cache.Set(token, resData, time.Duration(resData.ExpiresIn-ah.cfg.CacheGCInterval)*time.Second)
+		ah.cache.Set(token, &resData, time.Duration(resData.ExpiresIn-ah.cfg.CacheGCInterval)*time.Second)
 	}
 	return &resData, nil
 }
