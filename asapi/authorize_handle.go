@@ -414,7 +414,7 @@ func (ah *AuthorizeHandle) VerifyTokenV2(token string) (*VerifyTokenInfo, *Error
 	}
 
 	var resData VerifyTokenInfo
-	if result := ah.request("/oauth2/verify",
+	if result := ah.request("/oauth2/verify/v2",
 		http.MethodGet, reqHandle, &resData); result != nil {
 		return nil, result
 	}
