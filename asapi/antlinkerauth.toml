@@ -1,0 +1,17 @@
+# 是否启用集结号认证
+enable = true
+# 认证中心网址
+url = "http://192.168.175.6:8090"
+# 应用 clientid
+client_id = "57d0c56597d5b1413bd01262"
+# 应用秘钥
+client_secret = "0d1414f8743294f14c53cb46bcb8d5ea3e773026"
+# 服务标志
+identify = "ANT"
+# 是否启用缓存
+is_enabled_cache = true
+# 缓存gc周期单位秒 默认60秒
+cache_gc_interval = 60
+# 认证中心连接池连接最大数量
+max_conns = 10
+

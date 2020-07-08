@@ -13,7 +13,8 @@ require (
 	github.com/golang/protobuf v1.4.2
 	github.com/google/uuid v1.1.1
 	github.com/kavu/go_reuseport v1.5.0 // indirect
-	github.com/satori/go.uuid v1.2.0
+	github.com/satori/go.uuid v1.2.1-0.20181028125025-b2ce2384e17b
+	gogs.xiaoyuanjijiehao.com/aag/ant-queen v1.2.1
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381
 	google.golang.org/grpc v1.30.0
 	gopkg.in/bsm/ratelimit.v1 v1.0.0-20160220154919-db14e161995a // indirect
