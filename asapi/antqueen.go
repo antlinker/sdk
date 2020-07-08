@@ -25,14 +25,14 @@ func loadCfg(key string) (cfg authorizeConfig) {
 }
 
 type authorizeConfig struct {
-	Enable          bool   `json:"enable,omitempty"`
-	URL             string `json:"url,omitempty" yaml:"url"`
-	ClientID        string `json:"client_id,omitempty" yaml:"client_id"`
-	ClientSecret    string `json:"client_secret,omitempty" yaml:"client_secret"`
-	Identify        string `json:"identify,omitempty" yaml:"identify"`
-	IsEnabledCache  bool   `json:"is_enabled_cache,omitempty"`  // 是否启用缓存
-	CacheGCInterval int    `json:"cache_gc_interval,omitempty"` // 缓存gc间隔(单位秒)
-	MaxConns        int    `json:"max_conns,omitempty"`
+	Enable          bool   `toml:"enable,omitempty" json:"enable,omitempty"`
+	URL             string `toml:"url,omitempty" json:"url,omitempty" yaml:"url"`
+	ClientID        string `toml:"client_id,omitempty" json:"client_id,omitempty" yaml:"client_id"`
+	ClientSecret    string `toml:"client_secret,omitempty" json:"client_secret,omitempty" yaml:"client_secret"`
+	Identify        string `toml:"identify,omitempty" json:"identify,omitempty" yaml:"identify"`
+	IsEnabledCache  bool   `toml:"is_enabled_cache,omitempty" json:"is_enabled_cache,omitempty"`   // 是否启用缓存
+	CacheGCInterval int    `toml:"cache_gc_interval,omitempty" json:"cache_gc_interval,omitempty"` // 缓存gc间隔(单位秒)
+	MaxConns        int    `toml:"max_conns,omitempty" json:"max_conns,omitempty"`
 }
 
 func initAuth(config *authorizeConfig) {
