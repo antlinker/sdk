@@ -15,8 +15,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/antlinker/sdk/permission/client"
-	"github.com/antlinker/sdk/permission/proto/permission"
+	"gogs.xiaoyuanjijiehao.com/antlinker/sdk/permission/client"
+	"gogs.xiaoyuanjijiehao.com/antlinker/sdk/permission/proto/permission"
 )
 
 func main() {

@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/antlinker/go-mqtt/client"
-	"github.com/antlinker/sdk/asapi"
-	"github.com/satori/go.uuid"
+	uuid "github.com/google/uuid"
+	"gogs.xiaoyuanjijiehao.com/antlinker/sdk/asapi"
 )
 
 // NewHandle 创建待办事项处理
@@ -47,7 +47,7 @@ func (h *Handle) Add(req *AddRequest) (err error) {
 
 	mreq := map[string]interface{}{
 		"MT":           "ADDTODO",
-		"AID":          uuid.Must(uuid.NewV4()).String(),
+		"AID":          uuid.New().String(),
 		"UIDs":         auids,
 		"TodoType":     req.TodoType,
 		"ContentValue": req.ContentValue,
@@ -130,7 +130,7 @@ type DelayRequest struct {
 	EndTime  time.Time
 }
 
-// Del 延期待办
+// Delay 延期待办
 func (h *Handle) Delay(req *DelayRequest) (err error) {
 	mreq := map[string]interface{}{
 		"MT":       "DELAYTODO",

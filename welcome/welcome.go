@@ -2,8 +2,8 @@ package welcome
 
 import (
 	"github.com/antlinker/go-mqtt/client"
-	"github.com/antlinker/sdk/asapi"
-	"github.com/antlinker/sdk/utils"
+	"gogs.xiaoyuanjijiehao.com/antlinker/sdk/asapi"
+	"gogs.xiaoyuanjijiehao.com/antlinker/sdk/utils"
 )
 
 var (

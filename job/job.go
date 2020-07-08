@@ -1,7 +1,7 @@
 package job
 
 import (
-	"github.com/antlinker/sdk/asapi"
+	"gogs.xiaoyuanjijiehao.com/antlinker/sdk/asapi"
 )
 
 var (

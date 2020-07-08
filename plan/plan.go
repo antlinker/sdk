@@ -3,7 +3,7 @@ package plan
 import (
 	"time"
 
-	"github.com/antlinker/sdk/asapi"
+	"gogs.xiaoyuanjijiehao.com/antlinker/sdk/asapi"
 )
 
 var (

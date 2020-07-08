@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/antlinker/sdk/asapi"
-	"github.com/antlinker/sdk/utils"
+	"gogs.xiaoyuanjijiehao.com/antlinker/sdk/asapi"
+	"gogs.xiaoyuanjijiehao.com/antlinker/sdk/utils"
 )
 
 const (

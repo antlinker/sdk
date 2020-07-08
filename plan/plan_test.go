@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/antlinker/sdk/asapi"
-	"github.com/antlinker/sdk/plan"
+	"gogs.xiaoyuanjijiehao.com/antlinker/sdk/asapi"
+	"gogs.xiaoyuanjijiehao.com/antlinker/sdk/plan"
 )
 
 func TestTest(t *testing.T) {
@@ -20,8 +20,8 @@ func TestTest(t *testing.T) {
 	plan.SetConfig(&plan.Config{
 		HTTPAddr: "http://127.0.0.1:8901",
 	})
-	err:=plan.Test("", time.Now().Add(10*time.Second), 1)
-	if err!=nil {
+	err := plan.Test("", time.Now().Add(10*time.Second), 1)
+	if err != nil {
 		t.Error(err)
 	}
 

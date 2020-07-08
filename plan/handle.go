@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/antlinker/sdk/asapi"
-	"github.com/antlinker/sdk/utils"
+	"gogs.xiaoyuanjijiehao.com/antlinker/sdk/asapi"
+	"gogs.xiaoyuanjijiehao.com/antlinker/sdk/utils"
 )
 
 const (
@@ -61,6 +61,7 @@ func (h *Handle) getANTUserID(intelUserCode string) (userID string, err error) {
 	userID = auids[0]
 	return
 }
+
 // Request 计划请求
 type Request struct {
 	Type      string    `json:"typ"`
@@ -69,15 +70,13 @@ type Request struct {
 	Spec      string    `json:"spec"`
 	Repeat    int       `json:"repeat"`
 }
-func (h *Handle) request(req Request) (err error) {
 
+func (h *Handle) request(req Request) (err error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 
 	defer cancel()
 
-	
-	
 	data, err := utils.PostJSON(ctx, h.getURL(jobRouter), req, func(req *http.Request) (*http.Request, error) {
 		token, err := asapi.GetToken()
 		if err != nil {
@@ -103,24 +102,22 @@ func (h *Handle) request(req Request) (err error) {
 }
 
 // Test 测试任务
-func (h *Handle) Test(spec string,startTime time.Time,repeat int) (err error) {
-	
-	
-	err = h.AddPlan(Request {
-		Type:"test",
-		Spec:spec,
-		StartTime:startTime,
-		Repeat:repeat,
+func (h *Handle) Test(spec string, startTime time.Time, repeat int) (err error) {
 
+	err = h.AddPlan(Request{
+		Type:      "test",
+		Spec:      spec,
+		StartTime: startTime,
+		Repeat:    repeat,
 	})
 
 	return
 }
 
 // AddPlan 添加任务
-func (h *Handle) AddPlan( req Request) error{
+func (h *Handle) AddPlan(req Request) error {
 	if req.StartTime.IsZero() {
-		req.StartTime=time.Now()
+		req.StartTime = time.Now()
 	}
 	return h.request(req)
 }

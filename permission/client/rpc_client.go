@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 
-	"github.com/antlinker/sdk/permission/proto/permission"
+	"gogs.xiaoyuanjijiehao.com/antlinker/sdk/permission/proto/permission"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
