@@ -112,7 +112,14 @@ func (ah *AuthorizeHandle) request(router, method string, reqHandle func(req *ht
 			return
 		} // 设置缓存
 	default:
-		result = NewErrorResult(string(buf), res.StatusCode)
+		result = ParseErrorResult(string(buf))
+		if result == nil {
+			result = NewErrorResult(string(buf), res.StatusCode)
+		} else {
+			if result.Code == 0 {
+				result.Code = res.StatusCode
+			}
+		}
 	}
 
 	return

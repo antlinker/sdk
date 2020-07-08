@@ -2,6 +2,7 @@ package asapi
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 )
 
@@ -39,6 +40,16 @@ type ErrorResult struct {
 // Error 实现error接口
 func (er *ErrorResult) Error() string {
 	return fmt.Sprintf("[ASAPI Error] %d - %s", er.Code, er.Message)
+}
+
+// ParseErrorResult 将认证中心的错误信息解析成 ErrorResult
+func ParseErrorResult(msg string) (result *ErrorResult) {
+	err := json.Unmarshal([]byte(msg), &result)
+	if err != nil {
+		return nil
+	}
+
+	return
 }
 
 // NewErrorResult 创建错误结果
